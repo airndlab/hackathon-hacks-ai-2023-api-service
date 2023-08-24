@@ -1,9 +1,10 @@
-name: api
+name: hackathon-hacks-ai-2023
 
 services:
-  service:
-    build:
-      context: .
+  api-service:
+    #build:
+    #  context: .
+    image: airndlab/hackathon-hacks-ai-2023-api-service
     environment:
       - RANKER_SERVICE_URL=http://ranker-service:80
     ports:
@@ -15,6 +16,10 @@ services:
 
   ranker-service:
     image: airndlab/hackathon-hacks-ai-2023-ranker-service
+    environment:
+      - DIR_PATH=/myfiles
+    volumes:
+      - ./demo/myfiles:/myfiles
     ports:
       - 8081:80
     networks:

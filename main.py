@@ -25,3 +25,11 @@ async def say_hello(name: str):
     response = requests.get(url)
     payload = json.loads(response.content.decode('utf-8'))
     return {"payload": payload}
+
+
+@app.get("/file/{filename}")
+async def read_file(filename: str):
+    url = f'{ranker_service_url}/file/{filename}'
+    response = requests.get(url)
+    payload = json.loads(response.content.decode('utf-8'))
+    return {"payload": payload}
