@@ -4,5 +4,22 @@ services:
   service:
     build:
       context: .
+    environment:
+      - RANKER_SERVICE_URL=http://ranker-service:80
     ports:
-      - 80:80
+      - 8080:80
+    networks:
+      - service-net
+    depends_on:
+      - ranker-service
+
+  ranker-service:
+    image: airndlab/hackathon-hacks-ai-2023-ranker-service
+    ports:
+      - 8081:80
+    networks:
+      - service-net
+
+networks:
+  service-net:
+    driver: bridge

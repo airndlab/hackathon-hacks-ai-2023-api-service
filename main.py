@@ -1,13 +1,27 @@
+import json
+import os
+
+import requests
 from fastapi import FastAPI
+
+ranker_service_url = os.getenv('RANKER_SERVICE_URL')
+if ranker_service_url is None:
+    raise Exception(f'No RANKER_SERVICE_URL')
 
 app = FastAPI()
 
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    url = f'{ranker_service_url}/'
+    response = requests.get(url)
+    payload = json.loads(response.content.decode('utf-8'))
+    return {"payload": payload}
 
 
 @app.get("/hello/{name}")
 async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+    url = f'{ranker_service_url}/hello/{name}'
+    response = requests.get(url)
+    payload = json.loads(response.content.decode('utf-8'))
+    return {"payload": payload}
