@@ -25,6 +25,11 @@ services:
     networks:
       - service-net
 
+  squad-service:
+    image: airndlab/hackathon-hacks-ai-2023-squad-service
+    networks:
+      - service-net
+
 networks:
   service-net:
     driver: bridge
