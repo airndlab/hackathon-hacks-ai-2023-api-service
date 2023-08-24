@@ -1,0 +1,8 @@
+name: api
+
+services:
+  service:
+    build:
+      context: .
+    ports:
+      - 80:80
