@@ -1,4 +1,3 @@
-import json
 import os
 
 import requests
@@ -17,12 +16,14 @@ squad_service_url = os.getenv('SQUAD_SERVICE_URL', default='http://127.0.0.1:809
 
 app = FastAPI()
 
+
 def __get_answer_by_context__(context: str, question: str) -> str:
     try:
         response = requests.post(squad_service_url + '/squad', json={'context':context, 'question':question}, verify=False)
         return response.json()
     except Exception as e:
         return 'Ошибка, не получилось найти ответ на Ваш вопрос ... '
+
 
 @app.get("/api/v1/question/")
 async def question(q: str = ''):
@@ -45,7 +46,7 @@ async def question(q: str = ''):
 
 @app.post("/api/v1/train")
 async def train():
-    return "OK"
+    return requests.post(ranker_service_url + '/train')
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=int(8083))
