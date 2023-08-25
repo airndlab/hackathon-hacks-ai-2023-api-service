@@ -22,7 +22,7 @@ def __get_answer_by_context__(context: str, question: str) -> str:
         response = requests.post(squad_service_url + '/squad', json={'context':context, 'question':question}, verify=False)
         return response.json()
     except Exception as e:
-        return 'Ошибка, не получилось найти ответ на Ваш вопрос ... '
+        return {"answer":"Ошибка, не получилось найти ответ на Ваш вопрос ... "}
 
 
 @app.get("/api/v1/question/")
