@@ -19,18 +19,18 @@ app = FastAPI()
 
 
 @app.get("/api/v1/question/")
-async def question(question: str = '', status_code=status.HTTP_200_OK):
+async def question(q: str = '', status_code=status.HTTP_200_OK):
     result = []
 
-    if question == 'ошибка':
+    if q == 'ошибка':
         result.append(Answer(answerText='По вашему вопросу не удалось найти ответ, пожалуйста, попробуйте перефразировать вопрос и спросить повторно.', url=''))
     else:
         result.append(Answer(answerText='чудо ответ', url=''))
 
     return result
 
-@app.post("/api/v1/traint", status_code=status.HTTP_201_CREATED)
-async def question():
+@app.post("/api/v1/train", status_code=status.HTTP_201_CREATED)
+async def train():
     return "OK"
 
 if __name__ == '__main__':
