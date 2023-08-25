@@ -17,14 +17,12 @@ squad_service_url = os.getenv('SQUAD_SERVICE_URL', default='http://127.0.0.1:809
 
 app = FastAPI()
 
-# def find_result(question: str, text: str):
-#     response = requests.post(squad_service_url + '/squad', json= {
-#         "context": text,
-#         "question": question
-#     })
-#     response.json
-#     return 
-
+def __get_answer_by_context__(context: str, question: str) -> str:
+    try:
+        response = requests.post(squad_service_url + '/squad', json={'context':context, 'question':question}, verify=False)
+        return response.json()
+    except Exception as e:
+        return 'Ошибка, не получилось найти ответ на Ваш вопрос ... '
 
 @app.get("/api/v1/question/")
 async def question(q: str = ''):
@@ -38,7 +36,8 @@ async def question(q: str = ''):
             if answer['type'] == 'question':
                 result.append(Answer(answerText=answer['a']))
             elif answer['type'] == 'question_and_answer':
-                result.append(Answer(answerText=answer['a']))
+                squad_answer = __get_answer_by_context__(context=answer['q'], question=answer['a'])
+                result.append(Answer(answerText=squad_answer['answer']))
     else :
         result.append(Answer(answerText='По вашему вопросу не удалось найти ответ, пожалуйста, попробуйте перефразировать вопрос и спросить повторно.'))
 
