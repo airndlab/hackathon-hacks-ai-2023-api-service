@@ -2,34 +2,36 @@ import json
 import os
 
 import requests
-from fastapi import FastAPI
+from fastapi import FastAPI, status
+import uvicorn
 
-ranker_service_url = os.getenv('RANKER_SERVICE_URL')
-if ranker_service_url is None:
-    raise Exception(f'No RANKER_SERVICE_URL')
+class Answer():
+    def __init__(self, answerText: str, url: str) -> None:
+        self.answerText=answerText
+        self.url=url 
+
+
+# ranker_service_url = os.getenv('RANKER_SERVICE_URL')
+# if ranker_service_url is None:
+#     raise Exception(f'No RANKER_SERVICE_URL')
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    url = f'{ranker_service_url}/'
-    response = requests.get(url)
-    payload = json.loads(response.content.decode('utf-8'))
-    return {"payload": payload}
+@app.get("/api/v1/question/")
+async def question(question: str = '', status_code=status.HTTP_200_OK):
+    result = []
 
+    if question == 'ошибка':
+        result.append(Answer(answerText='По вашему вопросу не удалось найти ответ, пожалуйста, попробуйте перефразировать вопрос и спросить повторно.', url=''))
+    else:
+        result.append(Answer(answerText='чудо ответ', url=''))
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    url = f'{ranker_service_url}/hello/{name}'
-    response = requests.get(url)
-    payload = json.loads(response.content.decode('utf-8'))
-    return {"payload": payload}
+    return result
 
+@app.post("/api/v1/traint", status_code=status.HTTP_201_CREATED)
+async def question():
+    return "OK"
 
-@app.get("/file/{filename}")
-async def read_file(filename: str):
-    url = f'{ranker_service_url}/file/{filename}'
-    response = requests.get(url)
-    payload = json.loads(response.content.decode('utf-8'))
-    return {"payload": payload}
+if __name__ == '__main__':
+    uvicorn.run(app, host="0.0.0.0", port=int(8083))
