@@ -67,6 +67,10 @@ async def question(q: str = '', vanilla: bool = is_vanilla_ranker_default, vecto
                 # if squad_response['score'] > 0.5:
                 result.append(
                     Answer(answerText=squad_answer['answer'], weight=answer['weight'], score=squad_answer['score']))
+            elif answer['type'] == 'service':
+                squad_answer = find_in_squad(q=q, text=answer['text'])
+                result.append(
+                    Answer(answerText=squad_answer['answer'], weight=answer['weight'], score=squad_answer['score']))
     else:
         result.append(Answer(
             answerText='По вашему вопросу не удалось найти ответ, пожалуйста, попробуйте перефразировать вопрос и спросить повторно.'))
