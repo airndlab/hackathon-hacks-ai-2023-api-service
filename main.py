@@ -53,6 +53,13 @@ def find_in_ranker(q: str, vanilla: bool, vectorizer: str = ''):
     return response.json()
 
 
+def find_by_services_in_ranker(q: str):
+    url = f'{ranker_service_url}/find_similarity_in_services?question={q}'
+
+    response = requests.get(url)
+    return response.json()
+
+
 @app.get("/api/v1/question/")
 async def question(q: str = '', vanilla: bool = is_vanilla_ranker_default, vectorizer: str | None = None):
     result = []
@@ -67,13 +74,17 @@ async def question(q: str = '', vanilla: bool = is_vanilla_ranker_default, vecto
                 # if squad_response['score'] > 0.5:
                 result.append(
                     Answer(answerText=squad_answer['answer'], weight=answer['weight'], score=squad_answer['score']))
-            elif answer['type'] == 'service':
+
+    else:
+        answers = find_by_services_in_ranker(q)
+        if answers and len(answers) > 0:
+            for answer in answers:
                 squad_answer = find_in_squad(q=q, text=answer['text'])
                 result.append(
                     Answer(answerText=squad_answer['answer'], weight=answer['weight'], score=squad_answer['score']))
-    else:
-        result.append(Answer(
-            answerText='По вашему вопросу не удалось найти ответ, пожалуйста, попробуйте перефразировать вопрос и спросить повторно.'))
+        else:
+            result.append(Answer(
+                answerText='По вашему вопросу не удалось найти ответ, пожалуйста, попробуйте перефразировать вопрос и спросить повторно.'))
 
     return result
 
