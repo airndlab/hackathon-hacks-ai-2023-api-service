@@ -18,8 +18,10 @@ class Answer:
 
 
 ranker_service_url = os.getenv('RANKER_SERVICE_URL', default='http://127.0.0.1:8085')
+vanilla_ranker_service_url = os.getenv('VANILLA_RANKER_SERVICE_URL', default='http://127.0.0.1:8086')
 squad_service_url = os.getenv('SQUAD_SERVICE_URL', default='http://127.0.0.1:8090')
 
+is_vanilla_ranker_default = os.getenv('VANILLA_RANKER_DEFAULT', default='False').lower() in ('true', '1', 't')
 
 def find_in_squad(q: str, text: str):
     try:
@@ -39,17 +41,24 @@ def find_in_squad(q: str, text: str):
         return {"answer": "Ошибка, не получилось найти ответ на Ваш вопрос ... ", "score": 0}
 
 
+def get_ranker_service_url(vanilla: bool):
+    if not vanilla:
+        return ranker_service_url
+    else:
+        return vanilla_ranker_service_url
 
-def find_in_ranker(q: str):
-    response = requests.get(ranker_service_url + '/find_similarity?question=' + q)
+
+def find_in_ranker(q: str, vanilla: bool):
+    service_url = get_ranker_service_url(vanilla)
+    response = requests.get(service_url + '/find_similarity?question=' + q)
     return response.json()
 
 
 @app.get("/api/v1/question/")
-async def question(q: str = ''):
+async def question(q: str = '', vanilla: bool = is_vanilla_ranker_default):
     result = []
 
-    answers = find_in_ranker(q)
+    answers = find_in_ranker(q, vanilla)
     if answers and len(answers) > 0:
         for answer in answers:
             if answer['type'] == 'question':
@@ -67,8 +76,9 @@ async def question(q: str = ''):
 
 
 @app.post("/api/v1/train")
-async def train():
-    return requests.post(ranker_service_url + '/train')
+async def train(vanilla: bool = is_vanilla_ranker_default):
+    service_url = get_ranker_service_url(vanilla)
+    return requests.post(service_url + '/train')
 
 
 if __name__ == '__main__':
