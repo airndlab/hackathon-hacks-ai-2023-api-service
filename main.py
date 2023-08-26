@@ -42,20 +42,20 @@ def find_in_squad(q: str, text: str):
         return {"answer": "Ошибка, не получилось найти ответ на Ваш вопрос ... ", "score": 0}
 
 
-def find_in_ranker(q: str, vanilla: bool, vectorizer: str = ''):
+def find_in_vanilla_ranker(q: str, vectorizer: str = ''):
+    url = f'{vanilla_ranker_service_url}/find_similarity?question={q}&vectorizer={vectorizer}'
+    response = requests.get(url)
+    return response.json()
 
-    if vanilla:
-        url = f'{vanilla_ranker_service_url}/find_similarity?question={q}&vectorizer={vectorizer}'
-    else:
-        url = f'{ranker_service_url}/find_similarity?question={q}'
 
+def find_in_ranker(q: str):
+    url = f'{ranker_service_url}/find_similarity?question={q}'
     response = requests.get(url)
     return response.json()
 
 
 def find_by_services_in_ranker(q: str):
     url = f'{ranker_service_url}/find_similarity_in_services?question={q}'
-
     response = requests.get(url)
     return response.json()
 
@@ -64,18 +64,26 @@ def find_by_services_in_ranker(q: str):
 async def question(q: str = '', vanilla: bool = is_vanilla_ranker_default, vectorizer: str | None = None):
     result = []
 
-    answers = find_in_ranker(q, vanilla, vectorizer)
+    # поиск по question
+    answers = find_in_vanilla_ranker(q, vectorizer)
     if answers and len(answers) > 0:
         for answer in answers:
             if answer['type'] == 'question':
                 result.append(Answer(answerText=answer['a'], weight=answer['weight']))
-            elif answer['type'] == 'question_and_answer':
-                squad_answer = find_in_squad(q=q, text=answer['q'] + ' ' + answer['a'])
-                # if squad_response['score'] > 0.5:
-                result.append(
-                    Answer(answerText=squad_answer['answer'], weight=answer['weight'], score=squad_answer['score']))
 
-    else:
+    if len(result) == 0:
+        # поиск по question_and_answer:
+        answers = find_in_ranker(q)
+        if answers and len(answers) > 0:
+            for answer in answers:
+                if answer['type'] == 'question_and_answer':
+                    squad_answer = find_in_squad(q=q, text=answer['q'] + ' ' + answer['a'])
+                    # if squad_response['score'] > 0.5:
+                    result.append(
+                        Answer(answerText=squad_answer['answer'], weight=answer['weight'], score=squad_answer['score']))
+
+    if len(result) == 0:
+        # поиск по услугам:
         answers = find_by_services_in_ranker(q)
         if answers and len(answers) > 0:
             for answer in answers:
