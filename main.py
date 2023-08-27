@@ -77,10 +77,7 @@ async def question(q: str = '', vanilla: bool = is_vanilla_ranker_default, vecto
         if answers and len(answers) > 0:
             for answer in answers:
                 if answer['type'] == 'question_and_answer':
-                    squad_answer = find_in_squad(q=q, text=answer['q'] + ' ' + answer['a'])
-                    # if squad_response['score'] > 0.5:
-                    result.append(
-                        Answer(answerText=squad_answer['answer'], weight=answer['weight'], score=squad_answer['score']))
+                    result.append(Answer(answerText=answer['a'], weight=answer['weight']))
 
     if len(result) == 0:
         # поиск по услугам:
